@@ -1,0 +1,72 @@
+version: '3'
+
+services:
+  pg-0:
+    image: docker.io/bitnami/postgresql-repmgr:11
+    deploy:
+      replicas: 1
+      placement:
+        constraints:
+          - "node.labels.pg_role == pg_primary"
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRESQL_POSTGRES_PASSWORD=adminpassword
+      - POSTGRESQL_USERNAME=customuser
+      - POSTGRESQL_PASSWORD=custompassword
+      - POSTGRESQL_DATABASE=customdatabase
+      - REPMGR_PASSWORD=repmgrpassword
+      - REPMGR_PRIMARY_HOST=pg-0
+      - REPMGR_PRIMARY_PORT=5432
+      - REPMGR_PARTNER_NODES=pg-0:5432,pg-1:5433,pg-2:5434
+      - REPMGR_NODE_NAME=pg-0
+      - REPMGR_NODE_NETWORK_NAME=pg-0
+      - REPMGR_PORT_NUMBER=5432
+
+  pg-1:
+    image: docker.io/bitnami/postgresql-repmgr:11
+    deploy:
+      replicas: 1
+      placement:
+        constraints:
+          - "node.labels.pg_role == pg_standby_1"
+    ports:
+      - "5433:5432"
+    depends_on:
+      - pg-0
+    environment:
+      - POSTGRESQL_POSTGRES_PASSWORD=adminpassword
+      - POSTGRESQL_USERNAME=customuser
+      - POSTGRESQL_PASSWORD=custompassword
+      - POSTGRESQL_DATABASE=customdatabase
+      - REPMGR_PASSWORD=repmgrpassword
+      - REPMGR_PRIMARY_HOST=pg-0
+      - REPMGR_PRIMARY_PORT=5432
+      - REPMGR_PARTNER_NODES=pg-0:5432,pg-1:5433,pg-2:5434
+      - REPMGR_NODE_NAME=pg-1
+      - REPMGR_NODE_NETWORK_NAME=pg-1
+      - REPMGR_PORT_NUMBER=5432
+
+  pg-2:
+    image: docker.io/bitnami/postgresql-repmgr:11
+    deploy:
+      replicas: 1
+      placement:
+        constraints:
+          - "node.labels.pg_role == pg_standby_2"
+    ports:
+      - "5434:5432"
+    depends_on:
+      - pg-0
+    environment:
+      - POSTGRESQL_POSTGRES_PASSWORD=adminpassword
+      - POSTGRESQL_USERNAME=customuser
+      - POSTGRESQL_PASSWORD=custompassword
+      - POSTGRESQL_DATABASE=customdatabase
+      - REPMGR_PASSWORD=repmgrpassword
+      - REPMGR_PRIMARY_HOST=pg-0
+      - REPMGR_PRIMARY_PORT=5432
+      - REPMGR_PARTNER_NODES=pg-0:5432,pg-1:5433,pg-2:5434
+      - REPMGR_NODE_NAME=pg-2
+      - REPMGR_NODE_NETWORK_NAME=pg-2
+      - REPMGR_PORT_NUMBER=5432
